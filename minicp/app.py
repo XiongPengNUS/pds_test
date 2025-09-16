@@ -80,7 +80,7 @@ def tool_effect_code(name, cat):
         f"@reactive.event(input.{id}_button)\n"
         f"def to_{id}_section():\n"
         f"    {cat}_selected.set('{name}')\n"
-        f"    ui.update_navs('main', selected='{cat}s_panel')\n"
+        f"    ui.update_navset('main', selected='{cat}s_panel')\n"
         f"    {cat}_memory.set([])\n"
     )
 
@@ -219,7 +219,7 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                         button_gap = "10px"
                         #button_heights = "110px"    
                         #icon_size = "140px", "120px"
-                        button_heights = "90px"
+                        button_heights = "80px"
                         icon_size = "95px", "70px"
                         figsize = (4, 3)
 
@@ -230,11 +230,10 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                     op_id = op_name.lower().replace(' ', '_')
                                     exec(tool_icon_code(op_id, figsize), tool_ns)
                                     icon = output_plot(f"{op_id}_button_icon",
-                                                    width=icon_size[0], height=icon_size[1])
+                                                       width=icon_size[0], height=icon_size[1])
 
-                                    ui.input_action_button(f"{op_id}_button", "", icon=icon,
-                                                        style="padding:0px;padding-top:5px;padding-bottom:5px",
-                                                        disabled=True)
+                                    ui.input_action_button(f"{op_id}_button", icon,
+                                                           style=icon_button_style, disabled=True)
                                     exec(tool_effect_code(op_name, "op"), tool_ns)
                                 
                         with ui.nav_panel("Visuals", value="dvs_toolset"):
@@ -244,11 +243,10 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                     dv_id = dv_name.lower().replace(' ', '_')
                                     exec(tool_icon_code(dv_id, figsize), tool_ns)
                                     icon = output_plot(f"{dv_id}_button_icon",
-                                                    width=icon_size[0], height=icon_size[1])
+                                                       width=icon_size[0], height=icon_size[1])
 
-                                    ui.input_action_button(f"{dv_id}_button", "", icon=icon,
-                                                        style="padding:0px;padding-top:5px;padding-bottom:5px",
-                                                        disabled=True)
+                                    ui.input_action_button(f"{dv_id}_button", icon,
+                                                           style=icon_button_style, disabled=True)
                                     exec(tool_effect_code(dv_name, "dv"), tool_ns)
 
                         with ui.nav_panel("Models", value="mds_toolset"):
@@ -258,11 +256,10 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                     md_id = md_name.lower().replace(' ', '_')
                                     exec(tool_icon_code(md_id, figsize), tool_ns)
                                     icon = output_plot(f"{md_id}_button_icon",
-                                                    width=icon_size[0], height=icon_size[1])
+                                                       width=icon_size[0], height=icon_size[1])
 
-                                    ui.input_action_button(f"{md_id}_button", "", icon=icon,
-                                                        style="padding:0px;padding-top:5px;padding-bottom:5px",
-                                                        disabled=True)
+                                    ui.input_action_button(f"{md_id}_button", icon,
+                                                           style=icon_button_style, disabled=True)
                                     exec(tool_effect_code(md_name, "md"), tool_ns)
 
                 with ui.layout_columns(col_widths=(5, 7), gap="20px", height="140px"):
@@ -1170,9 +1167,9 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                     def hist_group_by_selectize_update_ui():
 
                                         if input.hist_group_by_selectize() == "":
-                                            ui.update_navs("hist_conditional_ui", selected="hist_single_case")
+                                            ui.update_navset("hist_conditional_ui", selected="hist_single_case")
                                         else:
-                                            ui.update_navs("hist_conditional_ui", selected="hist_multiple_case")
+                                            ui.update_navset("hist_conditional_ui", selected="hist_multiple_case")
                                 
                                 elif dv_type == "KDE":
                                     with ui.layout_columns(col_widths=(3, 9)):
@@ -1233,9 +1230,9 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                     def kde_group_by_selectize_update_ui():
 
                                         if input.kde_group_by_selectize() == "":
-                                            ui.update_navs("kde_conditional_ui", selected="kde_single_case")
+                                            ui.update_navset("kde_conditional_ui", selected="kde_single_case")
                                         else:
-                                            ui.update_navs("kde_conditional_ui", selected="kde_multiple_case")
+                                            ui.update_navset("kde_conditional_ui", selected="kde_multiple_case")
 
                                 elif dv_type == "Box plot":
                                     with ui.layout_columns(col_widths=(3, 9)):
@@ -1309,11 +1306,11 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                     def boxplot_group_by_selectize_update_ui():
 
                                         if input.boxplot_hue_selectize() == "":
-                                            ui.update_navs("boxplot_conditional_ui",
-                                                           selected="boxplot_single_case")
+                                            ui.update_navset("boxplot_conditional_ui",
+                                                             selected="boxplot_single_case")
                                         else:
-                                            ui.update_navs("boxplot_conditional_ui",
-                                                           selected="boxplot_multiple_case")
+                                            ui.update_navset("boxplot_conditional_ui",
+                                                             selected="boxplot_multiple_case")
                                 
                                 elif dv_type == "Probability plot":
                                     with ui.layout_columns(col_widths=(4, 8)):
@@ -1645,11 +1642,11 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                         color_data = input.scatter_color_data_selectize()
 
                                         if color_data == "":
-                                            ui.update_navs("scatter_conditional_ui",
-                                                           selected="scatter_single_case")
+                                            ui.update_navset("scatter_conditional_ui",
+                                                             selected="scatter_single_case")
                                         else:
-                                            ui.update_navs("scatter_conditional_ui",
-                                                           selected="scatter_multiple_case")
+                                            ui.update_navset("scatter_conditional_ui",
+                                                             selected="scatter_multiple_case")
                                             
                                             if color_data in col_cats:
                                                 cmaps, cmap = cat_cmaps, "tab10"
@@ -1755,11 +1752,11 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                         color_data = input.regplot_color_data_selectize()
 
                                         if color_data == "":
-                                            ui.update_navs("regplot_conditional_ui",
-                                                           selected="regplot_single_case")
+                                            ui.update_navset("regplot_conditional_ui",
+                                                             selected="regplot_single_case")
                                         else:
-                                            ui.update_navs("regplot_conditional_ui",
-                                                           selected="regplot_multiple_case")
+                                            ui.update_navset("regplot_conditional_ui",
+                                                             selected="regplot_multiple_case")
                                             cmaps, cmap = cat_cmaps, "tab10"
                                             ui.update_selectize("regplot_cmap_selectize",
                                                                 choices=cmaps, selected=cmap)
@@ -2255,8 +2252,8 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                     @reactive.effect
                     def sklearn_page_update():
                         page = md_page.get()
-                        ui.update_navs("model_page_navset",
-                                    selected=f"model_page{md_page.get()}")
+                        ui.update_navset("model_page_navset",
+                                         selected=f"model_page{md_page.get()}")
                         ui.update_action_button("sklearn_page_back_button", disabled=page < 2)
 
                         if page == 1:
@@ -2753,7 +2750,7 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
         @reactive.event(*(save_buttons + cancel_buttons))
         def node_to_canvas_panel():
 
-            ui.update_navs("main", selected="canvas_panel")
+            ui.update_navset("main", selected="canvas_panel")
             ops.set(dict(type=None, source=None, data_out=None))
             dvs.set(dict(type=None, source=None, fig=None, width=640, height=480))
             mds.set(dict(type="", source={}, results=None, outputs=None, memory={}))
