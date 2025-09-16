@@ -18,22 +18,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 #import pyperclip
-from xlsxwriter.workbook import Workbook
+#from xlsxwriter.workbook import Workbook
 
 from shiny import reactive
 from shiny.ui import output_plot
 from shiny.express import render, ui, input, expressify
 
-from bokeh.models import ColorPicker
-from shinywidgets import render_bokeh
-
 from .autosource import *
 from .canvas import *
 from .styles import *
-
+from .pycolorinput import color_input as ui_color_input
 
 #current_file = Path(__file__)
 #current_directory = current_file.parent
+
+ui.head_content(
+    ui.tags.script(src="color-input.js?v=1")  # bump v= to bust caches if you edit the file
+)
 
 def hr(margin=0.75, offset=0):
 
@@ -196,7 +197,6 @@ mds = reactive.value(dict(type="", source={}, results=None, outputs=None, memory
 md_memory = reactive.value({})
 md_page = reactive.value(1)
 
-
 dvs_view = reactive.value(dict(fig=None, width=640, height=480))
 
 model_visual_view = reactive.value(dict(pred=None, reside=None))
@@ -207,9 +207,6 @@ model_page = reactive.value(1)
 model_reset = reactive.value(False)
 
 var_names = reactive.value([])
-
-
-#ui.page_opts(title="Panda Shifu", full_width=True)
 
 with ui.layout_column_wrap(width="1060px", fixed_width=True):
     with ui.navset_hidden(id="main"):
@@ -1090,26 +1087,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
 
                                     with ui.layout_columns(col_widths=(3, 9)):
                                         inline_label("Palette", pt="8px")
-                                        with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                        with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                             @render.ui
                                             def value_counts_hexcolor():
                                                 c = color.get()
                                                 return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                            @render_bokeh(height="36px", width="100%", fill=True)
-                                            def value_counts_color_picker():
-                                                picker = ColorPicker(
-                                                    title="",
-                                                    color='#1f77b4',
-                                                    min_width=95
-                                                )
-
-                                                def update_value_counts_picker_color(attr, old, new):
-                                                    color.set(new)
-
-                                                picker.on_change('color', update_value_counts_picker_color)
-                                                return picker
+                                            ui_color_input("value_counts_color_input", "", value='#1f77b4')
+                                        
+                                        @reactive.effect
+                                        @reactive.event(input.value_counts_color_input)
+                                        def update_value_counts_color():
+                                            c = input.value_counts_color_input()
+                                            color.set(c)
                                     
                                         inline_label("Opacity", pt="22px")
                                         ui.input_slider("value_counts_alpha_slider", "",
@@ -1147,27 +1136,19 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                         with ui.nav_panel(None, value="hist_single_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
                                                 inline_label("Palette", pt="8px")
-                                                with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                                with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                                     @render.ui
                                                     def hist_hexcolor():
                                                         c = color.get()
                                                         return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                                    @render_bokeh(height="36px", width="100%", fill=True)
-                                                    def hist_color_picker():
-                                                        picker = ColorPicker(
-                                                            title="",
-                                                            color='#1f77b4',
-                                                            min_width=95
-                                                        )
-                                            
-                                                        def update_hist_picker_color(attr, old, new):
-                                                            color.set(new)
-
-                                                        picker.on_change('color', update_hist_picker_color)
-                                                        return picker
+                                                    ui_color_input("hist_color_input", "", value='#1f77b4')
                                         
+                                            @reactive.effect
+                                            @reactive.event(input.hist_color_input)
+                                            def update_hist_color():
+                                                c = input.hist_color_input()
+                                                color.set(c)
+
                                         with ui.nav_panel(None, value="hist_multiple_case"):
                                             with ui.layout_columns(col_widths=(6, 6)):
                                                 ui.input_selectize("hist_grouped_norm_selectize", "Normalized",
@@ -1218,26 +1199,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                         with ui.nav_panel(None, value="kde_single_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
                                                 inline_label("Palette", pt="8px")
-                                                with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                                with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                                     @render.ui
                                                     def kde_hexcolor():
                                                         c = color.get()
                                                         return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                                    @render_bokeh(height="36px", width="100%", fill=True)
-                                                    def kde_color_picker():
-                                                        picker = ColorPicker(
-                                                            title="",
-                                                            color='#1f77b4',
-                                                            min_width=95
-                                                        )
-                                            
-                                                        def update_kde_picker_color(attr, old, new):
-                                                            color.set(new)
-
-                                                        picker.on_change('color', update_kde_picker_color)
-                                                        return picker
+                                                    ui_color_input("kde_color_input", "", value='#1f77b4')
+                                        
+                                                @reactive.effect
+                                                @reactive.event(input.kde_color_input)
+                                                def update_kde_color():
+                                                    c = input.kde_color_input()
+                                                    color.set(c)
                                         
                                         with ui.nav_panel(None, value="kde_multiple_case"):
                                             with ui.layout_columns(col_widths=(6, 6)):
@@ -1307,26 +1280,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                         with ui.nav_panel(None, value="boxplot_single_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
                                                 inline_label("Palette", pt="8px")
-                                                with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                                with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                                     @render.ui
                                                     def boxplot_hexcolor():
                                                         c = color.get()
                                                         return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                                    @render_bokeh(height="36px", width="100%", fill=True)
-                                                    def boxplot_color_picker():
-                                                        picker = ColorPicker(
-                                                            title="",
-                                                            color='#1f77b4',
-                                                            min_width=95
-                                                        )
-                                            
-                                                        def update_boxplot_picker_color(attr, old, new):
-                                                            color.set(new)
-
-                                                        picker.on_change('color', update_boxplot_picker_color)
-                                                        return picker
+                                                    ui_color_input("boxplot_color_input", "", value='#1f77b4')
+                                        
+                                                @reactive.effect
+                                                @reactive.event(input.boxplot_color_input)
+                                                def update_boxplot_color():
+                                                    c = input.boxplot_color_input()
+                                                    color.set(c)
                                         
                                         with ui.nav_panel(None, value="boxplot_multiple_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
@@ -1363,26 +1328,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
 
                                     with ui.layout_columns(col_widths=(3, 9)):
                                         inline_label("Palette", pt="8px")
-                                        with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                        with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                             @render.ui
-                                            def probplot_hexcolor():
+                                            def proba_plot_hexcolor():
                                                 c = color.get()
                                                 return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                            @render_bokeh(height="36px", width="100%", fill=True)
-                                            def probplot_color_picker():
-                                                picker = ColorPicker(
-                                                    title="",
-                                                    color='#1f77b4',
-                                                    min_width=95
-                                                )
-                                            
-                                                def update_probplot_picker_color(attr, old, new):
-                                                    color.set(new)
-
-                                                picker.on_change('color', update_probplot_picker_color)
-                                                return picker
+                                            ui_color_input("proba_plot_color_input", "", value='#1f77b4')
+                                        
+                                        @reactive.effect
+                                        @reactive.event(input.proba_plot_color_input)
+                                        def update_bar_color():
+                                            c = input.proba_plot_color_input()
+                                            color.set(c)
 
                                     with ui.layout_columns(col_widths=(3, 9)):
                                         inline_label("Opacity", pt="22px")
@@ -1451,29 +1408,30 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                     with ui.layout_columns(col_widths=(3, 9)):
                                         inline_label("Y-data")
                                         ui.input_selectize("bar_ydata_selectize", "", choices=[""]+col_nums)
-                                    
+                                        inline_label("Label")
+                                        ui.input_text("bar_label_text", "", placeholder="None")
+
+                                        @reactive.effect
+                                        @reactive.event(input.bar_ydata_selectize)
+                                        def bar_labels_update():
+                                            if input.bar_ydata_selectize() != "":
+                                                ui.update_text("bar_label_text",
+                                                               placeholder=input.bar_ydata_selectize())
+
                                     with ui.layout_columns(col_widths=(3, 9)):
                                         inline_label("Palette", pt="8px")
-                                        with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                        with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                             @render.ui
                                             def bar_hexcolor():
                                                 c = color.get()
                                                 return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                            @render_bokeh(height="36px", width="100%", fill=True)
-                                            def bar_color_picker():
-                                                picker = ColorPicker(
-                                                    title="",
-                                                    color=init_color.get(),
-                                                    min_width=95
-                                                )
-                                            
-                                                def update_bar_picker_color(attr, old, new):
-                                                    color.set(new)
-
-                                                picker.on_change('color', update_bar_picker_color)
-                                                return picker
+                                            ui_color_input("bar_color_input", "", value=init_color.get())
+                                        
+                                        @reactive.effect
+                                        @reactive.event(input.bar_color_input)
+                                        def update_bar_color():
+                                            c = input.bar_color_input()
+                                            color.set(c)
                                     
                                     with ui.layout_columns(col_widths=(-6, 6)):
                                         ui.input_action_button("bar_add_button", "New bar", )
@@ -1568,6 +1526,17 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                                            choices=[""]+col_nums,
                                                            multiple=True, remove_button=True,
                                                            options={"placeholder": "None", "maxItems": 2})
+                                        
+                                        inline_label("Label")
+                                        ui.input_text("line_label_text", "", placeholder="None")
+
+                                        @reactive.effect
+                                        @reactive.event(input.line_ydata_selectize)
+                                        def line_labels_update():
+                                            if input.line_ydata_selectize() != "":
+                                                ui.update_text("line_label_text",
+                                                               placeholder=input.line_ydata_selectize())
+                                                
                                     with ui.layout_columns(col_widths=(6, 6)):
                                         styles = ["solid", "dash", "dot", "dash-dot"]
                                         ui.input_selectize("line_style_selectize", "Style", choices=styles)
@@ -1585,26 +1554,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                                         min=0.1, max=2, step=0.05, value=1)
 
                                         inline_label("Palette", pt="8px")
-                                        with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                        with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                             @render.ui
                                             def line_hexcolor():
                                                 c = color.get()
                                                 return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                            @render_bokeh(height="36px", width="100%", fill=True)
-                                            def line_color_picker():
-                                                picker = ColorPicker(
-                                                    title="",
-                                                    color=init_color.get(),
-                                                    min_width=95
-                                                )
-                                            
-                                                def update_line_picker_color(attr, old, new):
-                                                    color.set(new)
-
-                                                picker.on_change('color', update_line_picker_color)
-                                                return picker
+                                            ui_color_input("line_color_input", "", value=init_color.get())
+                                        
+                                        @reactive.effect
+                                        @reactive.event(input.line_color_input)
+                                        def update_line_color():
+                                            c = input.line_color_input()
+                                            color.set(c)
                                     
                                     with ui.layout_columns(col_widths=(-6, 6)):
                                         ui.input_action_button("line_add_button", "New line", )
@@ -1653,26 +1614,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                         with ui.nav_panel(None, value="scatter_single_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
                                                 inline_label("Palette", pt="8px")
-                                                with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                                with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                                     @render.ui
                                                     def scatter_hexcolor():
                                                         c = color.get()
                                                         return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                                    @render_bokeh(height="36px", width="100%", fill=True)
-                                                    def scatter_color_picker():
-                                                        picker = ColorPicker(
-                                                            title="",
-                                                            color='#1f77b4',
-                                                            min_width=95
-                                                        )
-                                            
-                                                        def update_scatter_picker_color(attr, old, new):
-                                                            color.set(new)
-
-                                                        picker.on_change('color', update_scatter_picker_color)
-                                                        return picker
+                                                    ui_color_input("scatter_color_input", "", value='#1f77b4')
+                                        
+                                            @reactive.effect
+                                            @reactive.event(input.scatter_color_input)
+                                            def update_scatter_color():
+                                                c = input.scatter_color_input()
+                                                color.set(c)
                                         
                                         with ui.nav_panel(None, value="scatter_multiple_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
@@ -1733,26 +1686,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                                         with ui.nav_panel(None, value="regplot_single_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
                                                 inline_label("Palette", pt="8px")
-                                                with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-
+                                                with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                                     @render.ui
                                                     def regplot_hexcolor():
                                                         c = color.get()
                                                         return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                                    @render_bokeh(height="36px", width="100%", fill=True)
-                                                    def regplot_color_picker():
-                                                        picker = ColorPicker(
-                                                            title="",
-                                                            color='#1f77b4',
-                                                            min_width=95
-                                                        )
-                                            
-                                                        def update_regplot_picker_color(attr, old, new):
-                                                            color.set(new)
-
-                                                        picker.on_change('color', update_regplot_picker_color)
-                                                        return picker
+                                                    ui_color_input("regplot_color_input", "", value='#1f77b4')
+                                        
+                                                @reactive.effect
+                                                @reactive.event(input.regplot_color_input)
+                                                def update_regplot_color():
+                                                    c = input.regplot_color_input()
+                                                    color.set(c)
                                         
                                         with ui.nav_panel(None, value="regplot_multiple_case"):
                                             with ui.layout_columns(col_widths=(3, 9)):
@@ -1862,26 +1807,18 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
 
                                     with ui.layout_columns(col_widths=(3, 9)):
                                         inline_label("Palette", pt="8px")
-                                        with ui.layout_columns(col_widths=(6, 6), gap="2px"):
-                                    
+                                        with ui.layout_columns(col_widths=(5, 7), gap="2px"):
                                             @render.ui
                                             def ac_plot_hexcolor():
                                                 c = color.get()
                                                 return ui.HTML(f"<span style='{hc_style}'>{c}</span>")
-
-                                            @render_bokeh(height="36px", width="100%", fill=True)
-                                            def ac_plot_color_picker():
-                                                picker = ColorPicker(
-                                                    title="",
-                                                    color='#1f77b4',
-                                                    min_width=95
-                                                )
-                                            
-                                                def update_ac_plot_picker_color(attr, old, new):
-                                                    color.set(new)
-
-                                                picker.on_change('color', update_ac_plot_picker_color)
-                                                return picker
+                                            ui_color_input("ac_plot_color_input", "", value='#1f77b4')
+                                        
+                                        @reactive.effect
+                                        @reactive.event(input.ac_plot_color_input)
+                                        def update_ac_plot_color():
+                                            c = input.ac_plot_color_input()
+                                            color.set(c)
 
                                     @reactive.effect
                                     @reactive.event(input.ac_plot_type_selectize)
@@ -1936,8 +1873,11 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                     def bar_add_button_action():
                         
                         bars = dv_memory.get()
-                        bars.append(dict(ydata=input.bar_ydata_selectize(), color=color.get()))
+                        bars.append(dict(ydata=input.bar_ydata_selectize(),
+                                         label=input.bar_label_text().strip(),
+                                         color=color.get()))
                         ui.update_selectize("bar_ydata_selectize", selected="")
+                        ui.update_text("bar_label_text", value="")
 
                         index = default_colors.index(init_color.get())
                         init_color.set(default_colors[(index + 1) % len(default_colors)])
@@ -1949,6 +1889,7 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
                         
                         lines = dv_memory.get()
                         lines.append(dict(ydata=input.line_ydata_selectize(),
+                                          label=input.line_label_text().strip(),
                                           xdata=input.line_xdata_selectize(),
                                           margin=input.line_margin_data_selectize(),
                                           color=color.get(),
@@ -1964,6 +1905,8 @@ with ui.layout_column_wrap(width="1060px", fixed_width=True):
 
                         ui.update_slider("line_width_slider", value=1.5)
                         ui.update_slider("line_marker_scale_slider", value=1)
+
+                        ui.update_text("line_label_text", value="")
 
                         index = default_colors.index(init_color.get())
                         init_color.set(default_colors[(index + 1) % len(default_colors)])
